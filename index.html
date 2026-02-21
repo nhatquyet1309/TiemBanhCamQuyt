@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiệm bánh Cam Quýt</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background-color: #000;
+        background: url('https://github.com/nhatquyet1309/TiemBanhCamQuyt/blob/main/z7551873724628_62392daf12c8b39a66c6870bcd6355e4.jpg?raw=true') no-repeat center center fixed;
+        background-size: cover;
+        font-family: 'Playfair Display', serif;
+      }
+
+      /* Lớp phủ màu đen ban đầu */
+      #dark-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000;
+        z-index: -1;
+        opacity: 0.95;
+        transition: opacity 3s ease-in-out;
+      }
+
+      /* --- UI CHUNG --- */
+      #maker-ui {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(20, 10, 5, 0.95);
+        z-index: 200;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #ffcc00;
+      }
+
+      #vn-box {
+        position: relative;
+        width: 80%;
+        max-width: 800px;
+        background: rgba(0, 0, 0, 0.85);
+        border: 2px solid #ffcc00;
+        border-radius: 15px;
+        padding: 30px;
+        cursor: pointer;
+        box-shadow: 0 0 30px rgba(255, 204, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+      }
+
+      #vn-text {
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 1.3rem;
+        line-height: 1.6;
+        color: #fff;
+        min-height: 100px;
+      }
+
+      #vn-text::after {
+        content: '|';
+        animation: blink 1s infinite;
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+
+      #vn-hint {
+        text-align: right;
+        font-size: 0.9rem;
+        color: #888;
+        margin-top: 15px;
+        font-style: italic;
+      }
+
+      #selection-container {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        animation: fadeInUI 1s ease;
+      }
+
+      @keyframes fadeInUI {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .control-group {
+        margin-bottom: 20px;
+        text-align: left;
+        width: 350px;
+      }
+
+      .control-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 1.2rem;
+        color: #fff;
+      }
+
+      .control-group select {
+        width: 100%;
+        padding: 12px;
+        font-size: 1rem;
+        border-radius: 8px;
+        border: 2px solid #ffcc00;
+        background: #332211;
+        color: #fff;
+        outline: none;
+      }
+
+      #start-btn {
+        margin-top: 30px;
+        padding: 15px 50px;
+        font-size: 1.5rem;
+        background: linear-gradient(45deg, #ff6600, #ffcc00);
+        border: none;
+        color: #1a0b00;
+        font-weight: bold;
+        border-radius: 50px;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(255, 102, 0, 0.4);
+        transition: all 0.3s;
+      }
+
+      #start-btn:hover {
+        transform: scale(1.05);
+      }
+
+      #info {
+        position: absolute;
+        top: 20px;
+        width: 100%;
+        text-align: center;
+        color: #ffcc00;
+        font-weight: bold;
+        font-size: 24px;
+        pointer-events: none;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+        z-index: 10;
+        display: none;
+      }
+
+      /* --- CÁC MODAL HIỂN THỊ --- */
+      .modal-popup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80%;
+        max-width: 600px;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+        z-index: 100;
+        text-align: center;
+        animation: popIn 0.5s ease;
+        font-family: 'Playfair Display', serif;
+        color: #2c3e50;
+      }
+
+      /* Hiệu ứng mực in trên giấy */
+      #modal-letter {
+        background: #fffdf0 url('https://www.transparenttextures.com/patterns/cream-paper.png');
+        max-width: 700px;
+        border: 1px solid #d4c5b0;
+      }
+
+      #modal-letter h2 {
+        font-family: 'Great Vibes', cursive;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        color: #1a1a1a;
+        /* Mô phỏng mực thấm sâu ở nét chữ lớn */
+        text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.4); 
+      }
+
+      #modal-letter p {
+        text-align: justify;
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #2b2b2b;
+        /* Mô phỏng mao dẫn mực nhẹ ở nét chữ nhỏ */
+        text-shadow: 0.2px 0.2px 0px rgba(0, 0, 0, 0.2);
+      }
+
+      .close-btn {
+        background: #d63384;
+        color: white;
+        border: none;
+        padding: 10px 30px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      #modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 99;
+      }
+
+      @keyframes popIn {
+        from {
+          transform: translate(-50%, -55%);
+          opacity: 0;
+        }
+
+        to {
+          transform: translate(-50%, -50%);
+          opacity: 1;
+        }
+      }
+    </style>
+    <script type="importmap"> {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+  </head>
+  <body>
+    <div id="dark-overlay"></div>
+    <div id="maker-ui">
+      <div id="vn-box" onclick="skipIntro()">
+        <div id="vn-text"></div>
+        <div id="vn-hint">▼ Chạm để tiếp tục...</div>
+      </div>
+      <div id="selection-container">
+        <h1 style="color: #ff9900; text-shadow: 2px 2px 0 #fff; margin-bottom: 20px;">🍊 Tiệm bánh Cam Quýt 🍊</h1>
+        <div class="control-group">
+          <label>🍰 1. Chọn Cốt Bánh</label>
+          <select id="base-flavor">
+            <option value="0x3E2723">🍫 Socola Đắng</option>
+            <option value="0xFFF9C4">🧀 Vani Truyền Thống</option>
+            <option value="0xF48FB1">🍓 Dâu Tây</option>
+            <option value="0x558B2F">🍵 Matcha</option>
+            <option value="0xB71C1C">🍰 Red Velvet</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>🧁 2. Chọn Lớp Kem</label>
+          <select id="cream-flavor">
+            <option value="0xFFE082">🍮 Kem Trứng Muối</option>
+            <option value="0xFFFFFF">☁️ Kem Tuyết</option>
+            <option value="0xFFCDD2">🌸 Kem Hoa Hồng</option>
+            <option value="0x9575CD">🫐 Kem Việt Quất</option>
+          </select>
+        </div>
+        <button id="start-btn" onclick="startExperience()">Hoàn thành & Thắp nến 🔥</button>
+      </div>
+    </div>
+    <div id="info">Giữ chuột vào bật lửa và kéo vào nến để thắp! 🔥</div>
+    <div id="modal-overlay" onclick="closeAllModals()"></div>
+    <div id="modal-bouquet" class="modal-popup">
+      <h2 style="color: #e57373;">🌸 Ký ức ngọt ngào</h2>
+      <p style="font-style: italic;">"Em còn nhớ những bó hoa đầu tiên anh và em tặng nhau..."</p>
+      <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+      <p>Bó hoa <strong>Chupa Chups</strong> ngọt ngào như em vậy đó! Lần đầu tiên trong đời anh được một cô gái tặng cho anh một bó hoa. Anh hi vọng rằng mình vẫn sẽ cùng nhau trao cho nhau những sự ngọt ngào đó ❤️ </p>
+      <p style="font-size: 0.9rem; color: #888; margin-top: 15px;">P/S: Anh ước là cô gái thứ 2 trong đời anh tặng hoa cho anh là con gái của chúng mình 🥰</p>
+      <button class="close-btn" onclick="closeAllModals()">Đóng lại</button>
+    </div>
+    <div id="modal-ring" class="modal-popup">
+      <h2 style="color: #7f8c8d;">💍 Minh chứng tình yêu</h2>
+      <div style="font-family: 'Great Vibes', cursive; font-size: 2rem; color: #333; margin: 20px 0;"> "Đôi nhẫn bạc minh chứng tình đôi ta <br> Không phô trương, chỉ lặng thầm gắn bó <br> Qua tháng năm vẫn miệt mài ở đó <br> Đủ để tin mình đã chọn đúng người." </div>
+      <button class="close-btn" onclick="closeAllModals()">Trân trọng</button>
+    </div>
+    <div id="modal-letter" class="modal-popup">
+      <h2>Gửi Em yêu dấu,</h2>
+      <div style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+        <p>Đây là một món quà đậm về tinh thần nhiều hơn, tuy nó còn thô sơ nhưng là tất cả những gì anh học được. Anh muốn ứng dụng càng sớm càng tốt những điều hay ý đẹp vào cuộc sống đời thường để thấy công nghệ nó thật sự thú vị. Những kiến thức đó chỉ thật sự có ý nghĩa khi anh dành nó cho người anh yêu nhất. Và người anh yêu nhất đó chính là em.</p>
+        <p>Anh xin được gửi em tình yêu của anh, tình yêu này mà bảo trưởng thành rồi thì chưa phải, vẫn có lúc nạnh tị nhau, chưa hiểu nhau, đôi co và hơn thua. Nhưng cuối cùng thứ tồn tại giữa chúng ta vẫn là tình yêu đôi lứa thật đặc biệt.</p>
+        <p>Anh biết anh còn nhiều khuyết điểm, còn trẻ con, còn có những giây phút ngây ngô đến phát bực. Anh cố gắng khắc phục tất cả, ngày một hoàn thiện để tới ngày anh chắc chắn hơn đồng nghĩa với việc em sẵn sàng, mình cùng nhau ra mắt 2 bên gia đình rồi tiến tới chuyện tương lai.</p>
+        <p style="font-size: 0.9rem; color: #555; border-top: 1px dashed #aaa; padding-top: 10px; margin-top: 20px;"> P/S: Thật sự lúc đầu anh nghĩ nó sẽ đặc biệt hơn, nhưng mà nghĩ mãiiii, anh làm cái này cái kia xong lại bỏ HUHU chắc tại tay nghề kém, anh sẽ trau dồi thêm. </p>
+      </div>
+      <button class="close-btn" onclick="closeAllModals()">Yêu anh ❤️</button>
+    </div>
+    <audio id="firework-bgm" src="I LOVE YOU special version.mp3"></audio>
+    <script>
+      const message = "HUHU 😢 vì lí do ở phần này mà anh không hoàn thiện được quà tặng em, anh đã cố khắc phục tuy nhiên màu sắc còn chưa đúng lắm. Em hãy tạm bỏ qua và trở thành một người thợ bánh thực thụ thiết kế chiếc bánh đặc biệt nhất cho hôm nay nhé, sẽ có phần quà phía sau ❤️";
+      const speed = 30;
+      let i = 0;
+      let isTyping = true;
+      const textElement = document.getElementById("vn-text");
+
+      function typeWriter() {
+        if (i < message.length && isTyping) {
+          textElement.innerHTML += message.charAt(i);
+          i++;
+          setTimeout(typeWriter, speed);
+        } else {
+          isTyping = false;
+          document.getElementById('vn-text').style.borderRight = "none";
+        }
+      }
+      window.onload = typeWriter;
+
+      function skipIntro() {
+        if (isTyping) {
+          isTyping = false;
+          textElement.innerHTML = message;
+        } else {
+          document.getElementById('vn-box').style.display = 'none';
+          document.getElementById('selection-container').style.display = 'flex';
+        }
+      }
+      let selectedBaseColor = 0x3E2723;
+      let selectedCreamColor = 0xFFE082;
+
+      function startExperience() {
+        selectedBaseColor = parseInt(document.getElementById('base-flavor').value);
+        selectedCreamColor = parseInt(document.getElementById('cream-flavor').value);
+        document.getElementById('maker-ui').style.transition = 'opacity 1s';
+        document.getElementById('maker-ui').style.opacity = '0';
+        setTimeout(() => {
+          document.getElementById('maker-ui').style.display = 'none';
+          document.getElementById('info').style.display = 'block';
+        }, 1000);
+        window.buildCake3D();
+      }
+
+      function closeAllModals() {
+        document.querySelectorAll('.modal-popup').forEach(el => el.style.display = 'none');
+        document.getElementById('modal-overlay').style.display = 'none';
+        if (window.resetCamera) window.resetCamera();
+        if (window.currentOpenedItem) {
+          window.markItemOpened(window.currentOpenedItem);
+          window.currentOpenedItem = null;
+        }
+      }
+    </script>
+    <script type="module">
+      import * as THREE from 'three';
+      import {
+        OrbitControls
+      } from 'three/addons/controls/OrbitControls.js';
+      // --- 1. SETUP SCENE ---
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 8, 14);
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true
+      });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      document.body.appendChild(renderer.domElement);
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = 0.5;
+      controls.maxPolarAngle = Math.PI / 2 - 0.05;
+      controls.minDistance = 5;
+      controls.maxDistance = 25;
+      // --- 2. ÁNH SÁNG ---
+      const ambientLight = new THREE.AmbientLight(0xffaa00, 0.05);
+      scene.add(ambientLight);
+      const spotLight = new THREE.SpotLight(0xffeebb, 0.2);
+      spotLight.position.set(0, 15, 0);
+      spotLight.angle = Math.PI / 6;
+      spotLight.penumbra = 0.5;
+      spotLight.castShadow = true;
+      scene.add(spotLight);
+      const windowLight = new THREE.DirectionalLight(0x4455ff, 0.1);
+      windowLight.position.set(0, 5, -10);
+      scene.add(windowLight);
+      // --- 3. BÀN GHẾ ---
+      const roomGroup = new THREE.Group();
+      const table = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, 0.2, 64), new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        roughness: 0.9
+      }));
+      table.position.y = -0.1;
+      table.receiveShadow = true;
+      roomGroup.add(table);
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.8, 5, 16), new THREE.MeshStandardMaterial({
+        color: 0x332211
+      }));
+      leg.position.y = -2.6;
+      roomGroup.add(leg);
+      scene.add(roomGroup);
+      // --- 4. CÁC VẬT PHẨM ---
+      // BÓ HOA
+      const bouquetGroup = new THREE.Group();
+      const wrapper = new THREE.Mesh(new THREE.ConeGeometry(0.6, 1.5, 32, 1, true), new THREE.MeshStandardMaterial({
+        color: 0xD7CCC8,
+        side: THREE.DoubleSide
+      }));
+      wrapper.rotation.x = Math.PI;
+      const clickBoxBouquet = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 1.5), new THREE.MeshBasicMaterial({
+        visible: false
+      }));
+      clickBoxBouquet.position.y = 0.5;
+      clickBoxBouquet.name = "bouquet";
+      bouquetGroup.add(wrapper);
+      bouquetGroup.add(clickBoxBouquet);
+      const flowerGeo = new THREE.DodecahedronGeometry(0.15);
+      const flowerColors = [0xFFCDD2, 0xE57373, 0xFFEBEE, 0xD32F2F];
+      for (let i = 0; i < 7; i++) {
+        const flower = new THREE.Mesh(flowerGeo, new THREE.MeshStandardMaterial({
+          color: flowerColors[Math.floor(Math.random() * flowerColors.length)]
+        }));
+        const angle = Math.random() * Math.PI * 2;
+        const r = Math.random() * 0.3;
+        flower.position.set(Math.cos(angle) * r, 0.8 + Math.random() * 0.1, Math.sin(angle) * r);
+        bouquetGroup.add(flower);
+      }
+      bouquetGroup.position.set(-3.5, 0.8, 2);
+      bouquetGroup.rotation.z = -Math.PI / 6;
+      bouquetGroup.rotation.y = Math.PI / 4;
+      roomGroup.add(bouquetGroup);
+      // BẬT LỬA
+      const lighterGroup = new THREE.Group();
+      const silverMat = new THREE.MeshStandardMaterial({
+        color: 0xFFFFFF,
+        metalness: 1.0,
+        roughness: 0.3
+      });
+      const bodyMesh = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.5, 0.15), silverMat);
+      const capMesh = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.25, 0.15), silverMat);
+      capMesh.position.y = 0.38;
+      capMesh.rotation.z = -Math.PI / 8;
+      capMesh.position.x = 0.05;
+      const lighterFlame = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), new THREE.MeshBasicMaterial({
+        color: 0xff4500
+      }));
+      lighterFlame.position.set(0, 0.45, 0);
+      lighterFlame.visible = false;
+      lighterGroup.add(lighterFlame);
+      lighterGroup.add(bodyMesh);
+      lighterGroup.add(capMesh);
+      lighterGroup.position.set(2.5, 0.25, 4);
+      lighterGroup.rotation.y = Math.random();
+      bodyMesh.name = "lighter";
+      capMesh.name = "lighter";
+      roomGroup.add(lighterGroup);
+      // HỘP NHẪN
+      const ringBoxGroup = new THREE.Group();
+      const boxMat = new THREE.MeshStandardMaterial({
+        color: 0x880000,
+        roughness: 0.6
+      });
+      const boxBottom = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.2, 0.6), boxMat);
+      boxBottom.castShadow = true;
+      boxBottom.name = "ringBox";
+      ringBoxGroup.add(boxBottom);
+      const lidPivot = new THREE.Group();
+      lidPivot.position.set(0, 0.1, -0.3);
+      const lidMesh = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.05, 0.6), boxMat);
+      lidMesh.position.set(0, 0, 0.3);
+      lidMesh.castShadow = true;
+      lidMesh.name = "ringBox";
+      lidPivot.add(lidMesh);
+      ringBoxGroup.add(lidPivot);
+      const pad = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.05, 0.5), new THREE.MeshStandardMaterial({
+        color: 0xffffff
+      }));
+      pad.position.y = 0.08;
+      ringBoxGroup.add(pad);
+      const ringGeo = new THREE.TorusGeometry(0.08, 0.015, 16, 32);
+      const ringMat = new THREE.MeshStandardMaterial({
+        color: 0xC0C0C0,
+        metalness: 1.0,
+        roughness: 0.1
+      });
+      const ring1 = new THREE.Mesh(ringGeo, ringMat);
+      ring1.position.set(-0.1, 0.15, 0);
+      ring1.rotation.y = Math.PI / 6;
+      ringBoxGroup.add(ring1);
+      const ring2 = new THREE.Mesh(ringGeo, ringMat);
+      ring2.scale.set(0.85, 0.85, 0.85);
+      ring2.position.set(0.1, 0.15, 0);
+      ring2.rotation.y = -Math.PI / 6;
+      ringBoxGroup.add(ring2);
+      ringBoxGroup.position.set(-2, 0.1, 4.5);
+      ringBoxGroup.rotation.y = 0.5;
+      roomGroup.add(ringBoxGroup);
+      // THIỆP
+      const cardGroup = new THREE.Group();
+      const cardMesh = new THREE.Mesh(new THREE.BoxGeometry(2, 0.05, 1.4), new THREE.MeshStandardMaterial({
+        color: 0xfff8e1
+      }));
+      cardMesh.castShadow = true;
+      cardMesh.receiveShadow = true;
+      const seal = new THREE.Mesh(new THREE.CircleGeometry(0.15, 32), new THREE.MeshStandardMaterial({
+        color: 0xd63384
+      }));
+      seal.rotation.x = -Math.PI / 2;
+      seal.position.y = 0.03;
+      cardGroup.add(cardMesh);
+      cardGroup.add(seal);
+      cardGroup.position.set(4, 0.1, 2);
+      cardGroup.rotation.y = Math.random() * Math.PI;
+      cardMesh.name = "birthdayCard";
+      seal.name = "birthdayCard";
+      scene.add(cardGroup);
+      // --- 5. BÁNH SINH NHẬT ---
+      let flameMesh = null;
+      let candleLightSource = null;
+      let isCandleLit = false;
+      let fireworkBoxGroup = null; 
+      window.buildCake3D = function() {
+        const cakeGroup = new THREE.Group();
+
+        function createLayer(radius, height, color, yPos) {
+          const m = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, height, 64), new THREE.MeshStandardMaterial({
+            color: color,
+            roughness: 0.4
+          }));
+          m.position.y = yPos;
+          m.castShadow = true;
+          m.receiveShadow = true;
+          return m;
+        }
+        cakeGroup.add(createLayer(3.5, 0.8, window.selectedBaseColor || 0x3E2723, 0.4));
+        cakeGroup.add(createLayer(2.5, 1.8, window.selectedCreamColor || 0xFFE082, 1.7));
+        cakeGroup.add(createLayer(1.5, 1.8, window.selectedCreamColor || 0xFFE082, 3.5));
+        const berryGeo = new THREE.SphereGeometry(0.2, 16, 16);
+        for (let i = 0; i < 8; i++) {
+          const b = new THREE.Mesh(berryGeo, new THREE.MeshStandardMaterial({
+            color: 0xaa0000,
+            roughness: 0.2
+          }));
+          const a = (i / 8) * Math.PI * 2;
+          b.position.set(Math.cos(a) * 2.2, 2.6, Math.sin(a) * 2.2);
+          cakeGroup.add(b);
+        }
+        const candle = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.2, 32), new THREE.MeshStandardMaterial({
+          color: 0xffffff
+        }));
+        candle.position.y = 5.0;
+        candle.castShadow = true;
+        cakeGroup.add(candle);
+        flameMesh = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), new THREE.MeshStandardMaterial({
+          color: 0xffd700,
+          emissive: 0xff6600,
+          emissiveIntensity: 4
+        }));
+        flameMesh.position.y = 5.7;
+        flameMesh.scale.set(1, 1.8, 1);
+        flameMesh.visible = false;
+        cakeGroup.add(flameMesh);
+        candleLightSource = new THREE.PointLight(0xffaa00, 0, 8);
+        candleLightSource.position.set(0, 6, 0);
+        candleLightSource.castShadow = true;
+        scene.add(candleLightSource);
+        cakeGroup.scale.set(0, 0, 0);
+        scene.add(cakeGroup);
+        let s = 0;
+        const pi = setInterval(() => {
+          s += 0.05;
+          cakeGroup.scale.set(s, s, s);
+          if (s >= 1) clearInterval(pi);
+        }, 16);
+      };
+      // --- 6. HỆ THỐNG PHÁO HOA & GAME LOGIC ---
+      const gameState = {
+        bouquet: false,
+        ring: false,
+        letter: false,
+        fireworkBoxSpawned: false,
+        fireworkLit: false
+      };
+      window.markItemOpened = function(item) {
+        if (item === 'bouquet') gameState.bouquet = true;
+        if (item === 'ringBox') gameState.ring = true;
+        if (item === 'birthdayCard') gameState.letter = true;
+        checkEndgame();
+      }
+
+      function checkEndgame() {
+        if (gameState.bouquet && gameState.ring && gameState.letter && !gameState.fireworkBoxSpawned) {
+          setTimeout(spawnFireworkBox, 1000);
+        }
+      }
+
+      function spawnFireworkBox() {
+        gameState.fireworkBoxSpawned = true;
+        fireworkBoxGroup = new THREE.Group();
+        const box = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 1.5), new THREE.MeshStandardMaterial({
+          color: 0xFF4500,
+          roughness: 0.5
+        }));
+        box.castShadow = true;
+        const labelBg = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 0.8), new THREE.MeshBasicMaterial({
+          color: 0xffffff
+        }));
+        labelBg.position.z = 0.76;
+        labelBg.position.y = 0.1;
+        box.add(labelBg);
+        const labelText = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.4), new THREE.MeshBasicMaterial({
+            color: 0x0033cc
+          })
+        );
+        labelText.position.z = 0.77;
+        labelText.position.y = 0.1;
+        box.add(labelText);
+        const fuseGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.5);
+        const fuseMat = new THREE.MeshStandardMaterial({
+          color: 0x2E7D32
+        });
+        const fuse = new THREE.Mesh(fuseGeo, fuseMat);
+        fuse.position.y = 0.9;
+        box.add(fuse);
+        fuse.name = "fuse";
+        fireworkBoxGroup.add(box);
+        fireworkBoxGroup.position.set(0, 0.75, 5); 
+        fireworkBoxGroup.scale.set(0, 0, 0);
+        roomGroup.add(fireworkBoxGroup);
+        let s = 0;
+        const interval = setInterval(() => {
+          s += 0.05;
+          fireworkBoxGroup.scale.set(s, s, s);
+          if (s >= 1) clearInterval(interval);
+        }, 16);
+        document.getElementById('info').innerHTML = "Một hộp quà bí mật vừa xuất hiện! 🔥";
+        document.getElementById('info').style.color = "#FF4500";
+      }
+
+      const particles = [];
+      const particleCount = 1500; 
+      const particleGeo = new THREE.BufferGeometry();
+      const particlePos = new Float32Array(particleCount * 3);
+      const particleColor = new Float32Array(particleCount * 3);
+      const particleSizes = new Float32Array(particleCount);
+      particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
+      particleGeo.setAttribute('color', new THREE.BufferAttribute(particleColor, 3));
+      particleGeo.setAttribute('size', new THREE.BufferAttribute(particleSizes, 1));
+      const sprite = new THREE.TextureLoader().load('https://threejs.org/examples/textures/sprites/spark1.png');
+      const particleMat = new THREE.PointsMaterial({
+        vertexColors: true,
+        size: 0.5,
+        transparent: true,
+        opacity: 1,
+        map: sprite,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      const particleSystem = new THREE.Points(particleGeo, particleMat);
+      scene.add(particleSystem);
+      particleSystem.visible = false;
+
+      class FireworkParticle {
+        constructor() {
+          this.reset();
+          this.active = false;
+        }
+        reset() {
+          this.x = 0;
+          this.y = 1.5; 
+          this.z = 5;
+          const angle = Math.random() * Math.PI * 2;
+          const spread = Math.random() * 0.3;
+          this.vx = Math.cos(angle) * spread;
+          this.vy = 0.5 + Math.random() * 0.8; 
+          this.vz = Math.sin(angle) * spread;
+          this.life = 1.0;
+          const colorType = Math.random();
+          if (colorType > 0.7) this.color = new THREE.Color(0xFFD700); 
+          else if (colorType > 0.4) this.color = new THREE.Color(0xFF4500); 
+          else this.color = new THREE.Color(0xFFFFFF); 
+          this.gravity = 0.015;
+          this.active = true;
+        }
+        update() {
+          if (!this.active) return;
+          this.x += this.vx;
+          this.y += this.vy;
+          this.z += this.vz;
+          this.vy -= this.gravity;
+          this.life -= 0.02;
+          if (Math.random() > 0.9) this.life += 0.05;
+          if (this.life <= 0) this.reset(); 
+        }
+      }
+      const particleData = [];
+      for (let i = 0; i < particleCount; i++) particleData.push(new FireworkParticle());
+
+      function igniteFireworks() {
+        if (gameState.fireworkLit) return;
+        gameState.fireworkLit = true;
+        particleSystem.visible = true;
+        document.getElementById('info').innerHTML = "Be my Valentine!!! 🎉🎉🎉";
+        document.getElementById('info').style.fontSize = "3rem";
+        const bgm = document.getElementById('firework-bgm');
+        bgm.volume = 0.5;
+        bgm.play().catch(e => console.log("Cần tương tác để phát nhạc"));
+        const bgInterval = setInterval(() => {
+          const hue = (Date.now() % 2000) / 2000;
+          windowLight.color.setHSL(hue, 0.8, 0.5);
+          windowLight.intensity = 3; 
+          ambientLight.intensity = 0.5 + Math.random() * 0.5;
+        }, 100);
+      }
+
+      // --- 7. LOGIC TƯƠNG TÁC ---
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+      let isDraggingLighter = false;
+      const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -5);
+      const dragIntersectPoint = new THREE.Vector3();
+      let returningToTable = false,
+        returnAlpha = 0;
+      let isRingBoxOpen = false,
+        ringBoxOpening = false;
+      let isZoomingRing = false;
+      const originalCameraPos = new THREE.Vector3(0, 8, 14);
+      const originalControlsTarget = new THREE.Vector3(0, 0, 0);
+      let targetCameraPos = new THREE.Vector3();
+      let targetLookAt = new THREE.Vector3();
+
+      function openModal(id) {
+        document.getElementById('modal-overlay').style.display = 'block';
+        document.getElementById(id).style.display = 'block';
+        controls.autoRotate = false;
+      }
+      window.resetCamera = function() {
+        isZoomingRing = false;
+        controls.enabled = true;
+        controls.autoRotate = true;
+        const startPos = camera.position.clone();
+        const startTarget = controls.target.clone();
+        let alpha = 0;
+
+        function returnAnim() {
+          if (isZoomingRing) return;
+          alpha += 0.05;
+          if (alpha <= 1) {
+            camera.position.lerpVectors(startPos, originalCameraPos, alpha);
+            controls.target.lerpVectors(startTarget, originalControlsTarget, alpha);
+            requestAnimationFrame(returnAnim);
+          } else {
+            controls.target.copy(originalControlsTarget);
+          }
+        }
+        returnAnim();
+      }
+
+      function focusOnObject(targetPos, offset) {
+        isZoomingRing = true;
+        controls.enabled = false;
+        targetLookAt.copy(targetPos);
+        targetCameraPos.copy(targetPos).add(offset);
+      }
+      window.addEventListener('mousedown', (event) => {
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(scene.children, true);
+        if (intersects.length > 0) {
+          const obj = intersects[0].object;
+          const name = obj.name;
+          if (name === "birthdayCard") {
+            window.currentOpenedItem = name;
+            openModal('modal-letter');
+            return;
+          }
+          if (name === "bouquet") {
+            window.currentOpenedItem = name;
+            openModal('modal-bouquet');
+            return;
+          }
+          if (name === "ringBox") {
+            if (!isRingBoxOpen && !ringBoxOpening) ringBoxOpening = true;
+            window.currentOpenedItem = name;
+            focusOnObject(ringBoxGroup.position, new THREE.Vector3(0, 2, 3));
+            setTimeout(() => openModal('modal-ring'), 1000);
+            return;
+          }
+          if (name === "lighter" && !returningToTable) {
+            isDraggingLighter = true;
+            controls.enabled = false;
+            lighterFlame.visible = true;
+            lighterGroup.rotation.set(0, 0, 0);
+          }
+        }
+      });
+      window.addEventListener('mousemove', (event) => {
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        if (isDraggingLighter) {
+          raycaster.ray.intersectPlane(dragPlane, dragIntersectPoint);
+          if (dragIntersectPoint) lighterGroup.position.copy(dragIntersectPoint);
+          const candlePos = new THREE.Vector3(0, 5.7, 0);
+          if (lighterGroup.position.distanceTo(candlePos) < 2.5 && !isCandleLit) {
+            isCandleLit = true;
+            if (flameMesh) flameMesh.visible = true;
+            if (candleLightSource) candleLightSource.intensity = 1.5;
+            document.getElementById('dark-overlay').style.opacity = '0';
+            setTimeout(() => document.getElementById('dark-overlay').style.display = 'none', 3000);
+            let lightInt = 0.05;
+            const lightUpInterval = setInterval(() => {
+              lightInt += 0.01;
+              ambientLight.intensity = lightInt;
+              spotLight.intensity = lightInt * 4;
+              if (lightInt >= 0.5) clearInterval(lightUpInterval);
+            }, 50);
+            document.getElementById('info').innerHTML = "Hãy khám phá các món đồ trên bàn...";
+          }
+          if (fireworkBoxGroup && !gameState.fireworkLit) {
+            const lighterPos = lighterGroup.position;
+            if (lighterPos.z > 2.0 && Math.abs(lighterPos.x) < 3.0) {
+              igniteFireworks();
+            }
+          }
+        }
+        const intersects = raycaster.intersectObjects(scene.children, true);
+        let isHover = false;
+        if (intersects.length > 0) {
+          const n = intersects[0].object.name;
+          if (n === "birthdayCard" || n === "lighter" || n === "ringBox" || n === "bouquet" || n === "fuse") isHover = true;
+        }
+        document.body.style.cursor = (isHover || isDraggingLighter) ? 'pointer' : 'default';
+      });
+      window.addEventListener('mouseup', () => {
+        if (isDraggingLighter) {
+          isDraggingLighter = false;
+          if (!isZoomingRing) controls.enabled = true;
+          lighterFlame.visible = false;
+          returningToTable = true;
+          returnAlpha = 0;
+        }
+      });
+
+      function animate() {
+        requestAnimationFrame(animate);
+        const time = Date.now() * 0.005;
+        if (ringBoxOpening) {
+          lidPivot.rotation.x -= 0.05;
+          if (lidPivot.rotation.x <= -Math.PI / 3) {
+            lidPivot.rotation.x = -Math.PI / 3;
+            ringBoxOpening = false;
+            isRingBoxOpen = true;
+          }
+        }
+        if (isZoomingRing) {
+          camera.position.lerp(targetCameraPos, 0.05);
+          controls.target.lerp(targetLookAt, 0.05);
+          ringBoxGroup.rotation.y += 0.005;
+        }
+        if (returningToTable) {
+          returnAlpha += 0.05;
+          if (returnAlpha >= 1) {
+            returnAlpha = 1;
+            returningToTable = false;
+            lighterGroup.rotation.y = Math.random();
+          }
+          lighterGroup.position.lerpVectors(lighterGroup.position, new THREE.Vector3(2.5, 0.25, 4), 0.1);
+        }
+        if (isCandleLit && flameMesh && candleLightSource) {
+          const flicker = Math.sin(time * 20) * 0.05 + Math.random() * 0.1;
+          flameMesh.scale.y = 1.8 + flicker;
+          flameMesh.scale.x = 1 - flicker * 0.3;
+          flameMesh.scale.z = 1 - flicker * 0.3;
+          candleLightSource.intensity = 1.5 + Math.random() * 0.2;
+        }
+        if (gameState.fireworkLit) {
+          const positions = particleGeo.attributes.position.array;
+          const colors = particleGeo.attributes.color.array;
+          particleData.forEach((p, i) => {
+            p.update();
+            positions[i * 3] = p.x;
+            positions[i * 3 + 1] = p.y;
+            positions[i * 3 + 2] = p.z;
+            colors[i * 3] = p.color.r;
+            colors[i * 3 + 1] = p.color.g;
+            colors[i * 3 + 2] = p.color.b;
+          });
+          particleGeo.attributes.position.needsUpdate = true;
+          particleGeo.attributes.color.needsUpdate = true;
+        }
+        controls.update();
+        renderer.render(scene, camera);
+      }
+      animate();
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    </script>
+  </body>
+</html>
